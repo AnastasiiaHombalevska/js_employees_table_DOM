@@ -1,10 +1,9 @@
 'use strict';
 
-// write code here
-// додати кнопки на th
-// 1. Implement table sorting by clicking on the title (in two directions).
+// додати сортування у зворотньому порядку
 const header = document.querySelector('thead');
 const titles = header.querySelectorAll('th');
+const table = document.querySelector('tbody');
 
 const SALARY_CELL = Array.from(titles).findIndex(
   (title) => title.textContent.trim().toLowerCase() === 'salary',
@@ -15,9 +14,7 @@ titles.forEach((title, index) => {
 });
 
 function sortsData(columnNumber) {
-  const table = document.querySelector('tbody');
   const sortingData = Array.from(table.querySelectorAll('tr'));
-
   const sortedData = sortingData.sort((item1, item2) => {
     const cell1 = item1.querySelectorAll('td')[columnNumber].textContent.trim();
     const cell2 = item2.querySelectorAll('td')[columnNumber].textContent.trim();
@@ -38,6 +35,21 @@ function sortsData(columnNumber) {
 
 // додати виділення при кліку на рядок
 // 2. When user clicks on a row, it should become selected.
+
+table.addEventListener('click', (e) => {
+  const rows = table.querySelectorAll('tr');
+  const targetClick = e.target.closest('tr');
+
+  rows.forEach((row) => row.classList.remove('active'));
+
+  if (targetClick.tagName === 'TR') {
+    if (targetClick.className) {
+      targetClick.classList.add('active');
+    } else {
+      targetClick.className = 'active';
+    }
+  }
+});
 
 // додати форму, що дозволяє додавати новий робітників до таблиці
 // 3. Write a script to add a form to the document
