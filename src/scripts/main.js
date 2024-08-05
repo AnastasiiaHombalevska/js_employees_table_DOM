@@ -14,13 +14,16 @@ titles.forEach((title, index) => {
   title.addEventListener('click', () => sortsData(index));
 });
 
+let reverseOrder = false;
+
 function sortsData(columnNumber) {
   const sortingData = Array.from(tableBody.querySelectorAll('tr'));
+
   const sortedData = sortingData.sort((item1, item2) => {
     const cell1 = item1.querySelectorAll('td')[columnNumber].textContent.trim();
     const cell2 = item2.querySelectorAll('td')[columnNumber].textContent.trim();
 
-    const isNumeric = !isNaN(cell1) && !isNaN(cell1);
+    const isNumeric = !isNaN(cell1) && !isNaN(cell2);
 
     if (columnNumber === SALARY_CELL) {
       return parseFloat(cell1.slice(1)) - parseFloat(cell2.slice(1));
@@ -31,7 +34,13 @@ function sortsData(columnNumber) {
     }
   });
 
+  if (reverseOrder) {
+    sortedData.reverse();
+  }
+
   sortedData.forEach((row) => tableBody.appendChild(row));
+
+  reverseOrder = !reverseOrder;
 }
 
 tableBody.addEventListener('click', (e) => {
@@ -54,14 +63,17 @@ tableBody.addEventListener('click', (e) => {
 // Form allows users to add new employees to the spreadsheet.
 
 const form = document.createElement('form');
+
 form.className = 'new-employee-form';
 
 for (const title of titles) {
   const label = document.createElement('label');
   const value = title.textContent.trim().toLowerCase();
+
   label.textContent = value[0].toUpperCase() + value.slice(1) + ': ';
 
   const input = document.createElement('input');
+
   input.setAttribute('name', 'name');
 
   if (value === 'age' || value === 'salary') {
@@ -80,11 +92,22 @@ for (const title of titles) {
 }
 
 const select = document.createElement('select');
+
 select.setAttribute('required', '');
-const optionValues = ['', 'Tokyo', 'Singapore', 'London', 'New York', 'Edinburgh', 'San Francisco'];
+
+const optionValues = [
+  '',
+  'Tokyo',
+  'Singapore',
+  'London',
+  'New York',
+  'Edinburgh',
+  'San Francisco',
+];
 
 for (let i = 0; i < optionValues.length; i++) {
   const option = document.createElement('option');
+
   // if (i === 0) {
   //   option.setAttribute('disabled', '')
   // }
@@ -97,6 +120,7 @@ for (let i = 0; i < optionValues.length; i++) {
 form.appendChild(select);
 
 const submitBtn = document.createElement('button');
+
 submitBtn.setAttribute('type', 'submit');
 submitBtn.textContent = 'Save to tableBody';
 form.appendChild(submitBtn);
