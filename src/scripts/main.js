@@ -1,6 +1,5 @@
 'use strict';
 
-// додати сортування у зворотньому порядку
 const table = document.querySelector('table');
 const header = document.querySelector('thead');
 const titles = header.querySelectorAll('th');
@@ -58,10 +57,6 @@ tableBody.addEventListener('click', (e) => {
   }
 });
 
-// додати форму, що дозволяє додавати новий робітників до таблиці
-// 3. Write a script to add a form to the document
-// Form allows users to add new employees to the spreadsheet.
-
 const form = document.createElement('form');
 
 form.className = 'new-employee-form';
@@ -72,70 +67,143 @@ for (const title of titles) {
 
   label.textContent = value[0].toUpperCase() + value.slice(1) + ': ';
 
-  const input = document.createElement('input');
+  if (value === 'office') {
+    const select = document.createElement('select');
 
-  input.setAttribute('name', 'name');
+    select.setAttribute('required', '');
+    select.setAttribute('data-qa', value);
+    select.setAttribute('name', value);
 
-  if (value === 'age' || value === 'salary') {
-    input.setAttribute('type', 'number');
+    const optionOffice = [
+      'Tokyo',
+      'Singapore',
+      'London',
+      'New York',
+      'Edinburgh',
+      'San Francisco',
+    ];
+
+    for (const city of optionOffice) {
+      const option = document.createElement('option');
+
+      option.setAttribute('value', city.toLowerCase());
+      option.textContent = city;
+
+      select.appendChild(option);
+    }
+
+    label.appendChild(select);
   } else {
-    input.setAttribute('type', 'text');
+    const input = document.createElement('input');
+
+    input.setAttribute('name', value);
+
+    if (value === 'age' || value === 'salary') {
+      input.setAttribute('type', 'number');
+    } else {
+      input.setAttribute('type', 'text');
+    }
+
+    input.setAttribute('data-qa', value);
+    input.setAttribute('placeholder', 'Enter ' + value);
+    input.setAttribute('required', '');
+
+    label.appendChild(input);
   }
-
-  input.setAttribute('data-qa', value);
-  input.setAttribute('placeholder', 'Enter ' + value);
-  input.setAttribute('required', '');
-
-  label.insertAdjacentElement('beforeend', input);
 
   form.appendChild(label);
 }
 
-const select = document.createElement('select');
-
-select.setAttribute('required', '');
-
-const optionValues = [
-  '',
-  'Tokyo',
-  'Singapore',
-  'London',
-  'New York',
-  'Edinburgh',
-  'San Francisco',
-];
-
-for (let i = 0; i < optionValues.length; i++) {
-  const option = document.createElement('option');
-
-  // if (i === 0) {
-  //   option.setAttribute('disabled', '')
-  // }
-  option.setAttribute('value', optionValues[i].toLowerCase());
-  option.textContent = optionValues[i];
-
-  select.appendChild(option);
-}
-
-form.appendChild(select);
-
 const submitBtn = document.createElement('button');
 
 submitBtn.setAttribute('type', 'submit');
-submitBtn.textContent = 'Save to tableBody';
+submitBtn.textContent = 'Save to table';
 form.appendChild(submitBtn);
 
 table.insertAdjacentElement('afterend', form);
 
-form.addEventListener('click', (e) => {
-  if (e.target.tagName === 'BUTTON') {
-    e.preventDefault();
-  }
+const formData = {
+  name: '',
+  position: '',
+  office: '',
+  age: '',
+  salary: '',
+};
+
+const showNotification = (type) => {
+  const notification = document.createElement('div');
+  const title = document.createElement('h1');
+  const desc = document.createElement('p');
+
+  notification.style.top = 10 + 'px';
+  notification.style.right = 10 + 'px';
+
+  notification.setAttribute('data-qa', 'notification');
+  notification.classList.add('notification');
+  // notification.classList.add(type);
+
+  title.textContent = `${type} message`;
+  desc.textContent = `${type === 'success' ? 'Employee added to table' : 'Add valid data'}`;
+
+  notification.append(title, desc);
+  notification.style.display = 'block';
+
+  // setTimeout(() => {
+  //   notification.style.display = 'none';
+  // }, 3000);
+};
+
+form.querySelectorAll('input').forEach((input) => {
+  input.addEventListener('input', (e) => {
+    const value =
+      e.target.type === 'number'
+        ? parseFloat(e.target.value)
+        : e.target.value.trim();
+
+    if (e.target.name === 'salary') {
+      formData[e.target.name] = '$' + value;
+    }
+
+    if (e.target.name === 'age') {
+      formData[e.target.name] =
+        value >= 18 <= 90 ? value : showNotification('error');
+    }
+  });
 });
 
-// показати повідомлення, якщо дані не валідні
-// 4. Show notification if form data is invalid
-// (use notification from the previous tasks).
+form.querySelector('select').addEventListener('change', (e) => {
+  formData[e.target.name] = e.target.value;
+});
+
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+
+  const allFieldsFilled = Object.values(formData).every(
+    (value) => value !== '',
+  );
+
+  if (allFieldsFilled) {
+    const row = document.createElement('tr');
+
+    Object.values(formData).forEach((data) => {
+      const cell = document.createElement('td');
+
+      cell.innerText = data;
+      row.appendChild(cell);
+    });
+
+    // row.classList.add('success');
+
+    tableBody.appendChild(row);
+    form.reset();
+
+    Object.keys(formData).forEach((key) => (formData[key] = ''));
+
+    showNotification('success');
+  } else {
+    showNotification('error');
+  }
+});
 
 // додати редагування комірок при подвійному кліку
 // 5. Implement editing of tableBody cells by double-clicking on it. (optional)
